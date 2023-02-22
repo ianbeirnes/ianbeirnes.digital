@@ -1,0 +1,72 @@
+// Spotify player with HTML, CSS, and JavaScript. The code uses the Spotify Web Playback SDK and the Spotify Web API, 
+// so you will need to obtain a valid access token to interact with the API.
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Spotify Player</title>
+    <style>
+      /* Add your CSS styles here */
+    </style>
+  </head>
+  <body>
+    <div id="player"></div>
+
+    <script>
+      // Add your JavaScript code here
+      // Load the Spotify Web Playback SDK
+      window.onSpotifyWebPlaybackSDKReady = () => {
+        // Your code here...
+      };
+      (function() {
+        var w = window;
+        var d = document;
+        var s = d.createElement("script");
+        s.src = "https://sdk.scdn.co/spotify-player.js";
+        s.async = true;
+        d.body.appendChild(s);
+      })();
+    </script>
+  </body>
+</html>
+
+
+window.onSpotifyWebPlaybackSDKReady = () => {
+  const token = 'your-access-token-here';
+  const player = new Spotify.Player({
+    name: 'Web Playback SDK Quick Start Player',
+    getOAuthToken: cb => { cb(token); },
+  });
+
+  // Error handling
+  player.addListener('initialization_error', ({ message }) => { console.error(message); });
+  player.addListener('authentication_error', ({ message }) => { console.error(message); });
+  player.addListener('account_error', ({ message }) => { console.error(message); });
+  player.addListener('playback_error', ({ message }) => { console.error(message); });
+
+  // Playback status updates
+  player.addListener('player_state_changed', state => { console.log(state); });
+
+  // Ready
+  player.addListener('ready', ({ device_id }) => {
+    console.log('Ready with Device ID', device_id);
+    play(device_id, 'spotify:track:7xGfFoTpQ2E7fRF5lN10tr');
+  });
+
+  // Connect to the player!
+  player.connect();
+};
+
+function play(device_id, trackUri) {
+  $.ajax({
+    url: "https://api.spotify.com/v1/me/player/play?device_id=" + device_id,
+    type: "PUT",
+    data: JSON.stringify({ "uris": [trackUri] }),
+    beforeSend: function(xhr){xhr.setRequestHeader('Authorization', 'Bearer ' + token);},
+    success: function(data) { 
+      console.log(data)
+    }
+  });
+}
+
